@@ -1,9 +1,9 @@
 import nodemailer from 'nodemailer';
 import * as AWS from '@aws-sdk/client-ses';
 import dotenv from 'dotenv';
-import { UserProfile } from '../users/entities/types/userTypes';
-import registrationMailTemplate from './emailTemplate.json';
-import emailConfig from './emailConfig.json';
+import { UserProfile } from '../../users/entities/types/userTypes';
+import registrationMailTemplate from './config/emailTemplate.json';
+import emailConfig from './config/emailConfig.json';
 
 dotenv.config();
 // console.log("MARTIN_LOG=> AWS", AWS);
@@ -20,12 +20,17 @@ const transporter = nodemailer.createTransport({
   SES: { ses, aws: AWS },
 });
 
-const buildTemplate = (user: UserProfile) => {
+const buildTemplate = (user: UserProfile, authCode: string) => {
+  const verifyEmailUrl = emailConfig.verifyEmailUrl
+    .replace('{{authCode}}', authCode)
+    .replace('{{email}}', user.email);
+
   const html = registrationMailTemplate.html
     .join('')
     .replaceAll('{{companyName}}', emailConfig.companyName)
     .replaceAll('{{mailerPosition}}', emailConfig.mailerPosition)
     .replaceAll('{{mailerName}}', emailConfig.mailerName)
+    .replaceAll('{{verifyEmailUrl}}', verifyEmailUrl)
     .replaceAll('{{userName}}', user.name ?? user.email)
     .replaceAll('{{supportMail}}', emailConfig.supportMail);
 
@@ -44,10 +49,13 @@ const buildTemplate = (user: UserProfile) => {
 };
 
 // async..await is not allowed in global scope, must use a wrapper
-export default async function emailSender(user: UserProfile) {
+export default async function sendRegistrationEmail(
+  user: UserProfile,
+  authCode: string
+) {
   // send mail with defined transport object
   console.log('ASD');
-  const template = buildTemplate(user);
+  const template = buildTemplate(user, authCode);
   try {
     const mailPayload = {
       from: {

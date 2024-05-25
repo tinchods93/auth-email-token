@@ -1,7 +1,8 @@
-import { UserItem, UserProfile } from './types/userTypes';
+import mongoose from 'mongoose';
+import { UserModelItem, UserProfile } from './types/userTypes';
 
 export default class ExistingUserEntity {
-  private id: string;
+  private _id: mongoose.Schema.Types.ObjectId;
 
   private email: string;
 
@@ -9,19 +10,23 @@ export default class ExistingUserEntity {
 
   private role: string;
 
-  constructor(input: UserItem) {
-    this.id = input.id;
+  private email_verified: boolean;
+
+  constructor(input: UserModelItem) {
+    this._id = input._id;
     this.email = input.email;
     this.creation_date = input.creation_date;
     this.role = input.role;
+    this.email_verified = input.email_verified;
   }
 
   get(): UserProfile {
     return {
-      id: this.id,
+      _id: this._id,
       email: this.email,
       role: this.role,
       creation_date: this.creation_date,
+      email_verified: this.email_verified,
     };
   }
 }

@@ -1,12 +1,15 @@
 import mongoose from 'mongoose';
 
-export type UserItem = {
-  id: mongoose.Schema.Types.UUID;
+export type UserModelItem = {
+  _id: mongoose.Schema.Types.ObjectId;
   email: string;
   password: string;
   creation_date: number;
   name?: string;
   role: string;
+  email_verified: boolean;
 };
 
-export type UserProfile = Omit<UserItem, 'password'>;
+export type UserItem = Omit<UserModelItem, '_id'>;
+
+export type UserProfile = Omit<UserModelItem, 'password'>;

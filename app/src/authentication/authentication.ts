@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import { getUserByEmail } from '../users/userRepository';
-import ExistingUserEntity from '../users/entities/existingUserEntity';
+import ExistingUserEntity from '../users/entities/userProfile';
 import { LoginInputType } from './types/authenticationTypes';
 import LoginException from '../errors/LoginException';
 import { LoginSchema } from '../models/schemas/LoginSchema';
