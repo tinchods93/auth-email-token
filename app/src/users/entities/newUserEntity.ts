@@ -6,8 +6,6 @@ import { UserItem } from './types/userTypes';
 import { UserRolesEnum } from '../enums/UserRolesEnum';
 
 export default class NewUserEntity {
-  private id: mongoose.Schema.Types.UUID;
-
   private email: string;
 
   private password: string;
@@ -17,7 +15,6 @@ export default class NewUserEntity {
   private role: string;
 
   constructor(email: string, password: string) {
-    this.id = new mongoose.Schema.Types.UUID(uuidv4());
     this.email = email?.trim().toLowerCase();
     this.password = password;
     this.creation_date = dayjs().unix();

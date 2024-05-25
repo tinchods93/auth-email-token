@@ -1,8 +1,7 @@
-import mongoose from 'mongoose';
 import { UserItem, UserProfile } from './types/userTypes';
 
 export default class ExistingUserEntity {
-  private id: mongoose.Schema.Types.UUID;
+  private id: string;
 
   private email: string;
 
