@@ -1,8 +1,7 @@
-import mongoose from 'mongoose';
 import { UserModelItem, UserProfileType } from './types/userTypes';
 
-export default class UserProfile {
-  private _id: mongoose.Schema.Types.ObjectId;
+export default class UserProfileEntity {
+  private _id: string;
 
   private email: string;
 
@@ -13,7 +12,7 @@ export default class UserProfile {
   private email_verified: boolean;
 
   constructor(input: UserModelItem) {
-    this._id = input._id;
+    this._id = input._id.toString();
     this.email = input.email;
     this.creation_date = input.creation_date;
     this.role = input.role;

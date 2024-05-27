@@ -1,69 +1,38 @@
-import { StatusCodes } from 'http-status-codes';
-import bcrypt from 'bcrypt';
-import { getUserByEmail, updateUser } from '../users/userRepository';
-import UserProfile from '../users/entities/userProfile';
-import { LoginInputType } from './types/authenticationTypes';
-import LoginException from '../errors/LoginException';
-import { LoginSchema } from '../models/schemas/LoginSchema';
-import SchemaValidator from '../models/SchemaValidator';
-import { createJwtToken, verifyAuthCode } from './authCode/authCodeRepository';
-import CustomException from '../errors/CustomException';
-import ErrorMessagesEnum from '../errors/enums/ErrorMessagesEnum';
-import ErrorNamesEnum from '../errors/enums/ErrorNamesEnum';
-import sendRegistrationEmail from '../emailSender/registration/sendRegistrationEmail';
+import sendRegistrationEmail from '../emailSender/login/sendRegistrationEmail';
+import AuthTokenRepository from './authCode/authTokenRepository';
+import UserProfileEntity from '../users/entities/userProfileEntity';
+import { UserProfileType } from '../users/entities/types/userTypes';
+import TokenException from './errors/TokenException';
+import UserRepository from '../users/userRepository';
 
-export async function Login(input: LoginInputType) {
-  const schemaValidation = new SchemaValidator(LoginSchema).validate(input);
-  console.log('schemaValidation', schemaValidation);
+export async function verifyTokenDomain(token: string) {
+  const authTokenRepository = new AuthTokenRepository();
 
-  const user = await getUserByEmail({ email: input.email });
+  console.log('MARTIN_LOG=> verifyUserEmail -> token', token);
+  const tokenData = await authTokenRepository.verify(token);
 
-  if (!user) {
-    throw new LoginException().handle();
+  if (!tokenData) {
+    throw new TokenException().handle();
+  }
+  const userData = tokenData as UserProfileType;
+
+  if (!userData.email_verified) {
+    await UserRepository.updateUser(userData._id, { email_verified: true });
   }
 
-  const isPasswordCorrect = bcrypt.compareSync(input.password, user?.password);
-
-  if (!isPasswordCorrect) {
-    throw new LoginException().handle();
-  }
-
-  return new UserProfile(user).get();
+  return userData;
 }
 
-export async function verifyUserEmail(email: string, code: string) {
-  console.log('MARTIN_LOG=> verifyUserEmail -> email, code', email, code);
-  const [verifyCode, user] = await Promise.all([
-    verifyAuthCode({
-      email,
-      authCode: code,
-    }),
-    getUserByEmail({ email }),
-  ]);
+export async function passwordlessLogin(email: string) {
+  const authTokenRepository = new AuthTokenRepository();
 
-  if (!verifyCode) {
-    throw new CustomException(
-      ErrorMessagesEnum.INVALID_VERIFICATION_CODE,
-      StatusCodes.BAD_REQUEST,
-      ErrorNamesEnum.GET_AUTH_CODE
-    ).handle();
-  }
+  const user =
+    (await UserRepository.getUserByEmail({ email }).catch(() => undefined)) ??
+    (await UserRepository.createUser({ email }));
 
-  await updateUser(user?._id.toString(), { email_verified: true });
-}
+  const userProfile = new UserProfileEntity(user).get();
 
-export async function sendPasswordlessEmail(email: string) {
-  const user = await getUserByEmail({ email });
+  const jwtToken = await authTokenRepository.create(userProfile);
 
-  if (!user) {
-    throw new CustomException(
-      ErrorMessagesEnum.USER_NOT_FOUND,
-      StatusCodes.NOT_FOUND,
-      ErrorNamesEnum.GET_USER_BY_EMAIL
-    ).handle();
-  }
-
-  const authCode = await createJwtToken(user);
-
-  await sendRegistrationEmail(user, authCode.auth_code);
+  await sendRegistrationEmail(userProfile, jwtToken);
 }

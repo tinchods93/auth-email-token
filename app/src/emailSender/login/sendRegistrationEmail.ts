@@ -21,10 +21,9 @@ const transporter = nodemailer.createTransport({
   SES: { ses, aws: AWS },
 });
 
-const buildTemplate = (user: UserProfileType, authCode: string) => {
+const buildTemplate = (user: UserProfileType, token: string) => {
   const verifyEmailUrl = emailConfig.verifyEmailUrl
-    .replace('{{authCode}}', authCode)
-    .replace('{{email}}', user.email)
+    .replace('{{token}}', token)
     .replace('{{domain}}', DOMAIN);
 
   const html = registrationMailTemplate.html
@@ -53,11 +52,11 @@ const buildTemplate = (user: UserProfileType, authCode: string) => {
 // async..await is not allowed in global scope, must use a wrapper
 export default async function sendRegistrationEmail(
   user: UserProfileType,
-  authCode: string
+  token: string
 ) {
   // send mail with defined transport object
-  console.log('MARTIN_LOG=> sendRegistrationEmail', user, authCode);
-  const template = buildTemplate(user, authCode);
+  console.log('MARTIN_LOG=> sendRegistrationEmail', user, token);
+  const template = buildTemplate(user, token);
   try {
     const mailPayload = {
       from: {

@@ -1,8 +1,8 @@
 import { StatusCodes } from 'http-status-codes';
 import { Request, Response } from 'express';
 import routerErrorHandler from '../../../../../errors/routerErrorHandler';
-import { sendPasswordlessEmail } from '../../../../../../src/authentication/authentication';
-import CustomException from '../../../../../../src/errors/CustomException';
+import { passwordlessLogin } from '../../../../../../src/authentication/authentication';
+import LoginException from '../errors/LoginException';
 
 export default async function passwordlessLoginDomain(
   request: Request,
@@ -11,14 +11,10 @@ export default async function passwordlessLoginDomain(
   try {
     const { email } = request.body;
     if (!email) {
-      throw new CustomException(
-        'email is required',
-        StatusCodes.BAD_REQUEST,
-        'sendVerifyDomain'
-      ).handle();
+      throw new LoginException().handle();
     }
 
-    await sendPasswordlessEmail(email).catch((error) => {
+    await passwordlessLogin(email).catch((error) => {
       console.log('MARTIN_LOG=> sendVerificationEmail -> error', error);
     });
 

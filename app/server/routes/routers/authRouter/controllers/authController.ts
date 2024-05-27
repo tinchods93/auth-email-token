@@ -1,9 +1,9 @@
-import passwordlessLoginDomain from './domain/passwordlessLoginDomain';
-import verifyEmailDomain from './domain/verifyDomain';
+import passwordlessLoginHandler from './handlers/passwordlessLoginHandler';
+import verifyTokenHandler from './handlers/verifyDomainHandler';
 
 const authController = {
-  login: passwordlessLoginDomain,
-  verify: verifyEmailDomain,
+  login: passwordlessLoginHandler,
+  verify: verifyTokenHandler,
 };
 
 export default authController;

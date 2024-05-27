@@ -1,14 +1,15 @@
-import { Request, Response } from 'express';
-import { getUserProfile } from '../../../../../../src/users/userRepository';
+import { Response } from 'express';
 import routerErrorHandler from '../../../../../errors/routerErrorHandler';
+import { RequestWithSession } from '../../../../../interfaces/requestInterface';
+import UserRepository from '../../../../../../src/users/userRepository';
 
 export default async function profileDomain(
-  request: Request,
+  request: RequestWithSession,
   response: Response
 ) {
   try {
-    const user = await getUserProfile({
-      id: request.query.user_id as string,
+    const user = await UserRepository.getUserProfile({
+      id: request.session.user_data._id,
     });
     response.status(200).send(user);
   } catch (errorObj) {

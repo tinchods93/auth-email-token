@@ -7,7 +7,7 @@ enum ErrorMessagesEnum {
 
   JWT_TOKEN_ERROR = 'JWT token error',
 
-  INVALID_VERIFICATION_CODE = 'Invalid verification code',
+  TOKEN_VERIFICATION_FAILED = 'Token verification failed',
 
   AUTH_CODE_NOT_FOUND = 'Auth code not found',
 

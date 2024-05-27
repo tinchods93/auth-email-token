@@ -5,7 +5,7 @@ import { UserProfileType } from '../../src/users/entities/types/userTypes';
 export interface RequestWithSession extends Request {
   session?: session.Session &
     Partial<session.SessionData> & {
-      authenticated?: boolean;
+      access_token?: string;
       user_data?: UserProfileType;
     };
 }
