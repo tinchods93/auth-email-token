@@ -4,5 +4,5 @@
     "companyName": "Protoprime",
     "supportMail": "protoprime.users.support@gmail.com",
     "emailSender": "protoprime.aws.dev@gmail.com",
-    "verifyEmailUrl": "{{domain}}/users/verify?email={{email}}&auth_code={{auth_code}}"
+    "verifyEmailUrl": "{{domain}}/auth/verify?email={{email}}&code={{authCode}}"
 }

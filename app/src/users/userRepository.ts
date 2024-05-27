@@ -1,13 +1,14 @@
 import { StatusCodes } from 'http-status-codes';
 import dotenv from 'dotenv';
 import NewUserEntity from './entities/newUserEntity';
-import ExistingUserEntity from './entities/userProfile';
+import UserProfile from './entities/userProfile';
 import CustomException from '../errors/CustomException';
 import ErrorMessagesEnum from '../errors/enums/ErrorMessagesEnum';
 import ErrorNamesEnum from '../errors/enums/ErrorNamesEnum';
 import UserModel from './entities/models/userModel';
 import sendRegistrationEmail from '../emailSender/registration/sendRegistrationEmail';
 import { createAuthCode } from '../authentication/authCode/authCodeRepository';
+import { UserModelItem } from './entities/types/userTypes';
 
 dotenv.config();
 
@@ -40,10 +41,9 @@ export async function getUsers(): Promise<any> {
 }
 
 export async function getUserProfile(payload: { id: string }): Promise<any> {
-  const User = await UserModel.findById(payload.id);
-  // const Table = database.getTable(usersTable ?? '');
-  // const User = await Table.getItem(payload.id);
-  if (!User) {
+  const userModel = await UserModel.findById(payload.id);
+
+  if (!userModel) {
     throw new CustomException(
       ErrorMessagesEnum.USER_NOT_FOUND,
       StatusCodes.NOT_FOUND,
@@ -51,15 +51,18 @@ export async function getUserProfile(payload: { id: string }): Promise<any> {
     ).handle();
   }
 
-  const userProfile = new ExistingUserEntity(User.toJSON()).get();
+  const userProfile = new UserProfile(userModel.toJSON()).get();
 
   return userProfile;
 }
 
-export async function getUserByEmail(payload: { email: string }): Promise<any> {
-  const User = await UserModel.findOne({ email: payload.email });
+export async function getUserByEmail(payload: {
+  email: string;
+}): Promise<UserModelItem> {
+  console.log('MARTIN_LOG=> getUserByEmail -> payload', payload);
+  const userModel = await UserModel.findOne({ email: payload.email });
 
-  if (!User) {
+  if (!userModel) {
     throw new CustomException(
       ErrorMessagesEnum.USER_NOT_FOUND,
       StatusCodes.NOT_FOUND,
@@ -67,15 +70,17 @@ export async function getUserByEmail(payload: { email: string }): Promise<any> {
     ).handle();
   }
 
-  const userProfile = new ExistingUserEntity(User.toJSON()).get();
-
-  return userProfile;
+  return userModel.toJSON() as UserModelItem;
 }
 
-export async function createUser(userData) {
-  const User = new NewUserEntity(userData.email, userData.password).get();
+export async function createUser(userData: {
+  email: string;
+  password: string;
+}) {
+  const userEntity = new NewUserEntity(userData.email, userData.password).get();
 
-  const existingUser = await getUserByEmail(User).catch(() => undefined);
+  const existingUser = await getUserByEmail(userEntity).catch(() => undefined);
+
   if (existingUser) {
     throw new CustomException(
       ErrorMessagesEnum.USER_ALREADY_EXISTS,
@@ -83,21 +88,20 @@ export async function createUser(userData) {
       ErrorNamesEnum.USER_REGISTRATION
     ).handle();
   }
-  const userModel = new UserModel(User);
+  const userModel = new UserModel(userEntity);
   const response = await userModel.save();
 
-  const userProfile = new ExistingUserEntity(response.toJSON()).get();
+  const userProfile = new UserProfile(response.toJSON()).get();
 
-  const authCode = await createAuthCode({ email: User.email });
+  const authCode = await createAuthCode({ email: userEntity.email });
 
   await sendRegistrationEmail(userProfile, authCode.auth_code);
 
   return userProfile;
 }
 
-
-export async function updateUser(payload) {
-  const User = await UserModel.findByIdAndUpdate(payload.id, payload, {
+export async function updateUser(id: string, payload) {
+  const User = await UserModel.findByIdAndUpdate(id, payload, {
     new: true,
   });
 
@@ -109,5 +113,5 @@ export async function updateUser(payload) {
     ).handle();
   }
 
-  return new ExistingUserEntity(User.toJSON()).get();
+  return new UserProfile(User.toJSON()).get();
 }

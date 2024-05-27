@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
-import { UserModelItem, UserProfile } from './types/userTypes';
+import { UserModelItem, UserProfileType } from './types/userTypes';
 
-export default class ExistingUserEntity {
+export default class UserProfile {
   private _id: mongoose.Schema.Types.ObjectId;
 
   private email: string;
@@ -20,7 +20,7 @@ export default class ExistingUserEntity {
     this.email_verified = input.email_verified;
   }
 
-  get(): UserProfile {
+  get(): UserProfileType {
     return {
       _id: this._id,
       email: this.email,

@@ -12,4 +12,4 @@ export type UserModelItem = {
 
 export type UserItem = Omit<UserModelItem, '_id'>;
 
-export type UserProfile = Omit<UserModelItem, 'password'>;
+export type UserProfileType = Omit<UserModelItem, 'password'>;

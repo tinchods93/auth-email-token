@@ -24,7 +24,7 @@ async function connectDb() {
   }
   const dbConnection = mongoose.connection;
   dbConnection.once('open', () => {
-    console.log(`Database connected: ${url}`);
+    console.log('Database connected');
     isConnected = true;
   });
 

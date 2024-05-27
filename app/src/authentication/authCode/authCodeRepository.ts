@@ -5,12 +5,19 @@ import ErrorMessagesEnum from '../../errors/enums/ErrorMessagesEnum';
 import CustomException from '../../errors/CustomException';
 import ErrorNamesEnum from '../../errors/enums/ErrorNamesEnum';
 
-export const getAuthCodeByEmail = async (
-  email: string
-): Promise<AuthCodeModelItemType | null> => {
-  const authCode = await AuthCodeModel.findOne({ email });
+export const queryAuthCode = async ({
+  email,
+  authCode,
+}: {
+  email: string;
+  authCode: string;
+}): Promise<AuthCodeModelItemType | null> => {
+  const authCodeItem = await AuthCodeModel.findOne({
+    email,
+    auth_code: authCode,
+  });
 
-  if (!authCode) {
+  if (!authCodeItem) {
     throw new CustomException(
       ErrorMessagesEnum.AUTH_CODE_NOT_FOUND,
       StatusCodes.NOT_FOUND,
@@ -18,7 +25,7 @@ export const getAuthCodeByEmail = async (
     ).handle();
   }
 
-  return authCode.toJSON();
+  return authCodeItem.toJSON();
 };
 
 export const createAuthCode = async (input: {
@@ -45,12 +52,12 @@ export const verifyAuthCode = async (input: {
   email: string;
   authCode: string;
 }): Promise<boolean> => {
-  const authCode = await getAuthCodeByEmail(input.email);
+  const authCode = await queryAuthCode(input);
 
-  if (authCode?.auth_code === input.authCode) {
-    await updateAuthCode(authCode._id, { used: true });
-    return true;
+  if (!authCode || authCode.used || authCode.auth_code !== input.authCode) {
+    return false;
   }
 
-  return false;
+  await updateAuthCode(authCode._id, { used: true });
+  return true;
 };

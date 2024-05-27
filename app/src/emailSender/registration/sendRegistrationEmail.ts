@@ -1,12 +1,13 @@
 import nodemailer from 'nodemailer';
 import * as AWS from '@aws-sdk/client-ses';
 import dotenv from 'dotenv';
-import { UserProfile } from '../../users/entities/types/userTypes';
+import { UserProfileType } from '../../users/entities/types/userTypes';
 import registrationMailTemplate from './config/emailTemplate.json';
 import emailConfig from './config/emailConfig.json';
 
 dotenv.config();
-// console.log("MARTIN_LOG=> AWS", AWS);
+
+const DOMAIN = process.env.DOMAIN as string;
 const ses = new AWS.SESClient({
   apiVersion: '2010-12-01',
   region: 'us-east-1',
@@ -20,10 +21,11 @@ const transporter = nodemailer.createTransport({
   SES: { ses, aws: AWS },
 });
 
-const buildTemplate = (user: UserProfile, authCode: string) => {
+const buildTemplate = (user: UserProfileType, authCode: string) => {
   const verifyEmailUrl = emailConfig.verifyEmailUrl
     .replace('{{authCode}}', authCode)
-    .replace('{{email}}', user.email);
+    .replace('{{email}}', user.email)
+    .replace('{{domain}}', DOMAIN);
 
   const html = registrationMailTemplate.html
     .join('')
@@ -50,11 +52,11 @@ const buildTemplate = (user: UserProfile, authCode: string) => {
 
 // async..await is not allowed in global scope, must use a wrapper
 export default async function sendRegistrationEmail(
-  user: UserProfile,
+  user: UserProfileType,
   authCode: string
 ) {
   // send mail with defined transport object
-  console.log('ASD');
+  console.log('MARTIN_LOG=> sendRegistrationEmail', user, authCode);
   const template = buildTemplate(user, authCode);
   try {
     const mailPayload = {
