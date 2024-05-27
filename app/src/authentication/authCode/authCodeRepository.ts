@@ -1,9 +1,12 @@
 import { StatusCodes } from 'http-status-codes';
+import jwt from 'jsonwebtoken';
 import { AuthCodeModelItemType } from './types/authCodeType';
 import AuthCodeModel from './models/authCodeModel';
 import ErrorMessagesEnum from '../../errors/enums/ErrorMessagesEnum';
 import CustomException from '../../errors/CustomException';
 import ErrorNamesEnum from '../../errors/enums/ErrorNamesEnum';
+import { UserModelItem } from '../../users/entities/types/userTypes';
+import UserProfile from '../../users/entities/userProfile';
 
 export const queryAuthCode = async ({
   email,
@@ -28,17 +31,22 @@ export const queryAuthCode = async ({
   return authCodeItem.toJSON();
 };
 
-export const createAuthCode = async (input: {
-  email: string;
-}): Promise<AuthCodeModelItemType> => {
-  const authModel = new AuthCodeModel({
-    email: input.email,
-    auth_code: `${Math.floor(100000 + Math.random() * 900000)}`,
-  });
-
-  const response = await authModel.save();
-
-  return response.toJSON();
+export const createJwtToken = async (
+  input: UserModelItem
+): Promise<AuthCodeModelItemType> => {
+  try {
+    const userProfile = new UserProfile(input).get();
+    const token = jwt.sign(userProfile, process.env.JWT_SECRET, {
+      expiresIn: '1h',
+    });
+    return token;
+  } catch (error) {
+    throw new CustomException(
+      ErrorMessagesEnum.JWT_TOKEN_ERROR,
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      ErrorNamesEnum.JWT_TOKEN_ERROR
+    ).handle();
+  }
 };
 
 export const updateAuthCode = async (

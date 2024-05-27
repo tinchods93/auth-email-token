@@ -5,6 +5,8 @@ enum ErrorMessagesEnum {
   PASSWORD_IS_REQUIRED = 'Password is required',
   PASSWORD_INVALID_LENGTH = 'Password must be at least 8 characters long',
 
+  JWT_TOKEN_ERROR = 'JWT token error',
+
   INVALID_VERIFICATION_CODE = 'Invalid verification code',
 
   AUTH_CODE_NOT_FOUND = 'Auth code not found',

@@ -1,7 +1,7 @@
 import { StatusCodes } from 'http-status-codes';
 import { Request, Response } from 'express';
 import routerErrorHandler from '../../../../../errors/routerErrorHandler';
-import { sendVerificationEmail } from '../../../../../../src/authentication/authentication';
+import { sendPasswordlessEmail } from '../../../../../../src/authentication/authentication';
 import CustomException from '../../../../../../src/errors/CustomException';
 
 export default async function passwordlessLoginDomain(
@@ -18,7 +18,7 @@ export default async function passwordlessLoginDomain(
       ).handle();
     }
 
-    await sendVerificationEmail(email).catch((error) => {
+    await sendPasswordlessEmail(email).catch((error) => {
       console.log('MARTIN_LOG=> sendVerificationEmail -> error', error);
     });
 

@@ -7,7 +7,7 @@ import ErrorMessagesEnum from '../errors/enums/ErrorMessagesEnum';
 import ErrorNamesEnum from '../errors/enums/ErrorNamesEnum';
 import UserModel from './entities/models/userModel';
 import sendRegistrationEmail from '../emailSender/registration/sendRegistrationEmail';
-import { createAuthCode } from '../authentication/authCode/authCodeRepository';
+import { createJwtToken } from '../authentication/authCode/authCodeRepository';
 import { UserModelItem } from './entities/types/userTypes';
 
 dotenv.config();
@@ -93,7 +93,7 @@ export async function createUser(userData: {
 
   const userProfile = new UserProfile(response.toJSON()).get();
 
-  const authCode = await createAuthCode({ email: userEntity.email });
+  const authCode = await createJwtToken({ email: userEntity.email });
 
   await sendRegistrationEmail(userProfile, authCode.auth_code);
 

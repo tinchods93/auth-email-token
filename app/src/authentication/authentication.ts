@@ -6,7 +6,7 @@ import { LoginInputType } from './types/authenticationTypes';
 import LoginException from '../errors/LoginException';
 import { LoginSchema } from '../models/schemas/LoginSchema';
 import SchemaValidator from '../models/SchemaValidator';
-import { createAuthCode, verifyAuthCode } from './authCode/authCodeRepository';
+import { createJwtToken, verifyAuthCode } from './authCode/authCodeRepository';
 import CustomException from '../errors/CustomException';
 import ErrorMessagesEnum from '../errors/enums/ErrorMessagesEnum';
 import ErrorNamesEnum from '../errors/enums/ErrorNamesEnum';
@@ -52,7 +52,7 @@ export async function verifyUserEmail(email: string, code: string) {
   await updateUser(user?._id.toString(), { email_verified: true });
 }
 
-export async function sendVerificationEmail(email: string) {
+export async function sendPasswordlessEmail(email: string) {
   const user = await getUserByEmail({ email });
 
   if (!user) {
@@ -63,7 +63,7 @@ export async function sendVerificationEmail(email: string) {
     ).handle();
   }
 
-  const authCode = await createAuthCode({ email });
+  const authCode = await createJwtToken(user);
 
   await sendRegistrationEmail(user, authCode.auth_code);
 }

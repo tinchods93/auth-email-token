@@ -8,6 +8,7 @@ enum ErrorNamesEnum {
   UPDATE_USER = 'UpdateUserException',
   SCHEMA_VALIDATION = 'SchemaValidationException',
   LOGIN = 'LoginException',
+  JWT_TOKEN_ERROR = 'JwtTokenErrorException',
 }
 
 export default ErrorNamesEnum;
